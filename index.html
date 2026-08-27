@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Peace and Conflict Resolution — CBT</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#f3f6fa;color:#18212b}
+.container{max-width:950px;margin:auto;padding:20px}
+.card{background:#fff;border-radius:14px;padding:24px;box-shadow:0 4px 18px rgba(0,0,0,.08);margin:18px 0}
+h1{margin-top:0}
+.muted{color:#667085}
+input[type=password]{width:100%;padding:13px;border:1px solid #cfd6df;border-radius:8px;font-size:16px}
+button{border:0;border-radius:8px;padding:12px 18px;font-size:15px;cursor:pointer}
+.primary{background:#1f5eff;color:#fff}
+.secondary{background:#e9eef5;color:#18212b}
+.hidden{display:none!important}
+.topbar{position:sticky;top:0;z-index:10;background:#fff;padding:12px 0;border-bottom:1px solid #e3e8ef}
+.timer{font-size:22px;font-weight:700;text-align:center;padding:10px;border-radius:9px;background:#fff0f0;color:#b42318}
+.progress{height:8px;background:#e5e7eb;border-radius:8px;overflow:hidden;margin-top:8px}
+.progress>div{height:100%;background:#1f5eff;width:0}
+.question{border:1px solid #e0e5eb;border-radius:12px;padding:18px;margin:16px 0}
+.question h3{margin-top:0;font-size:17px}
+.option{display:block;padding:10px 12px;margin:7px 0;border:1px solid #e1e6ec;border-radius:8px;cursor:pointer}
+.option:hover{background:#f7f9fc}
+.option input{margin-right:9px}
+.result{font-size:22px;font-weight:700}
+.correct{background:#eaf7ee;border-color:#72c08a}
+.incorrect{background:#fff0f0;border-color:#e48b8b}
+.small{font-size:13px}
+</style>
+</head>
+<body>
+<div class="container">
+
+<div id="login" class="card">
+  <h1>Peace and Conflict Resolution CBT</h1>
+  <p class="muted">100 objective questions • 50 minutes</p>
+  <label for="password"><strong>Enter password</strong></label>
+  <input id="password" type="password" autocomplete="off" placeholder="Password">
+  <p id="loginError" class="small" style="color:#b42318"></p>
+  <button class="primary" onclick="startTest()">Access Test</button>
+</div>
+
+<div id="test" class="hidden">
+  <div class="topbar">
+    <div class="timer" id="timer">50:00</div>
+    <div class="progress"><div id="progressBar"></div></div>
+    <div class="small muted" id="progressText">0 of 100 answered</div>
+  </div>
+  <div class="card">
+    <h1>Peace and Conflict Resolution</h1>
+    <p class="muted">Choose the correct option from A–D. The test will submit automatically when time expires.</p>
+    <form id="quizForm"></form>
+    <button type="button" class="primary" onclick="submitTest(false)">Submit Test</button>
+  </div>
+</div>
+
+<div id="results" class="hidden">
+  <div class="card">
+    <h1>Test Result</h1>
+    <div class="result" id="score"></div>
+    <p id="summary"></p>
+    <button class="secondary" onclick="showAnswers()">Show Correct Answers</button>
+  </div>
+  <div id="answerReview" class="card hidden"></div>
+</div>
+
+</div>
+
+<script>
+const QUESTIONS = [{"number": 1, "q": "Peace can be described as a state of ______.", "options": {"A": "violence", "B": "mind", "C": "confusion", "D": "disagreement"}, "answer": "B"}, {"number": 2, "q": "Which of the following is associated with peace as a state of mind?", "options": {"A": "Aggression", "B": "Serenity and calmness", "C": "Violence", "D": "Fear"}, "answer": "B"}, {"number": 3, "q": "Peace as the absence of conflict includes the absence of ______.", "options": {"A": "cooperation", "B": "harmony", "C": "violence and war", "D": "tolerance"}, "answer": "C"}, {"number": 4, "q": "Peaceful co-existence means ______.", "options": {"A": "living separately", "B": "living together peacefully", "C": "avoiding communication", "D": "competing for resources"}, "answer": "B"}, {"number": 5, "q": "Peace is primarily concerned with creating and maintaining a ______ order in society.", "options": {"A": "violent", "B": "temporary", "C": "just", "D": "political"}, "answer": "C"}, {"number": 6, "q": "Peace makes ______ possible.", "options": {"A": "conflict", "B": "justice", "C": "violence", "D": "discrimination"}, "answer": "B"}, {"number": 7, "q": "Peace as respect and tolerance involves maintaining good ______ between people.", "options": {"A": "conflicts", "B": "relationships", "C": "disagreements", "D": "competitions"}, "answer": "B"}, {"number": 8, "q": "Inner peace is also referred to as ______ peace.", "options": {"A": "political", "B": "spiritual", "C": "industrial", "D": "ethnic"}, "answer": "B"}, {"number": 9, "q": "Inner peace involves personal ______.", "options": {"A": "confrontation Peace and Conflict Resolution  Page 2", "B": "tranquility", "C": "competition", "D": "aggression"}, "answer": "B"}, {"number": 10, "q": "Peace as the absence of war refers to the absence of ______ conflict.", "options": {"A": "direct/violent", "B": "personal", "C": "political", "D": "industrial"}, "answer": "A"}, {"number": 11, "q": "Peace as justice and development involves the absence of ______ violence.", "options": {"A": "direct", "B": "structural", "C": "personal", "D": "verbal"}, "answer": "B"}, {"number": 12, "q": "Conflict is a form of ______ between two or more parties.", "options": {"A": "cooperation", "B": "confrontation", "C": "reconciliation", "D": "tolerance"}, "answer": "B"}, {"number": 13, "q": "Conflict may result when groups have incompatible goals, values, or ______.", "options": {"A": "friendships", "B": "aspirations", "C": "traditions", "D": "agreements"}, "answer": "B"}, {"number": 14, "q": "According to the note, conflict is ______.", "options": {"A": "avoidable", "B": "inevitable", "C": "imaginary", "D": "unnecessary"}, "answer": "B"}, {"number": 15, "q": "Conflict occurs in everyday operations and ______.", "options": {"A": "relationships", "B": "elections only", "C": "courts only", "D": "businesses only"}, "answer": "A"}, {"number": 16, "q": "Incompatible aspirations can lead to ______.", "options": {"A": "peace", "B": "frustration", "C": "tolerance", "D": "reconciliation"}, "answer": "B"}, {"number": 17, "q": "When frustration reaches a certain degree, ______ emerges.", "options": {"A": "harmony", "B": "crisis", "C": "justice", "D": "negotiation"}, "answer": "B"}, {"number": 18, "q": "Not all conflicts are considered ______.", "options": {"A": "inevitable", "B": "negative", "C": "social Peace and Conflict Resolution  Page 3", "D": "political"}, "answer": "B"}, {"number": 19, "q": "Some conflicts can create opportunities for change, development, and ______.", "options": {"A": "war", "B": "growth", "C": "violence", "D": "fear"}, "answer": "B"}, {"number": 20, "q": "Differences in opinion may lead to better understanding if settled ______.", "options": {"A": "violently", "B": "amicably", "C": "secretly", "D": "politically"}, "answer": "B"}, {"number": 21, "q": "Which of the following is a cause of conflict in African society?", "options": {"A": "Ethnic differences", "B": "Peace education", "C": "Reconciliation", "D": "Tolerance"}, "answer": "A"}, {"number": 22, "q": "Contest for ______ can cause conflict.", "options": {"A": "friendship", "B": "power", "C": "peace", "D": "education"}, "answer": "B"}, {"number": 23, "q": "Competition over ______ is listed as a cause of conflict.", "options": {"A": "relationships", "B": "resources", "C": "tolerance", "D": "justice"}, "answer": "B"}, {"number": 24, "q": "Religious bigotry is associated with a lack of ______.", "options": {"A": "tolerance and cooperation", "B": "education and research", "C": "resources and power", "D": "justice and law"}, "answer": "A"}, {"number": 25, "q": "______ performance is identified as a cause of conflict.", "options": {"A": "Excellent", "B": "Sub-standard", "C": "Outstanding", "D": "Perfect"}, "answer": "B"}, {"number": 26, "q": "Failure to comply with rules and regulations is known as ______.", "options": {"A": "cooperation", "B": "non-compliance", "C": "reconciliation", "D": "mediation"}, "answer": "B"}, {"number": 27, "q": "Communication failure can result from wrong ______.", "options": {"A": "decisions", "B": "assumptions", "C": "agreements", "D": "negotiations Peace and Conflict Resolution  Page 4"}, "answer": "B"}, {"number": 28, "q": "Which of the following is a listed cause of conflict?", "options": {"A": "Value differences", "B": "Peace education", "C": "Forgiveness", "D": "Justice"}, "answer": "A"}, {"number": 29, "q": "Lack of ______ can contribute to conflict.", "options": {"A": "cooperation", "B": "tolerance", "C": "mediation", "D": "reconciliation"}, "answer": "A"}, {"number": 30, "q": "Differences in methods are referred to as ______ differences.", "options": {"A": "religious", "B": "methodological", "C": "ethnic", "D": "political"}, "answer": "B"}, {"number": 31, "q": "Which of the following is NOT a type of conflict mentioned in the note?", "options": {"A": "Ethnic conflict", "B": "Religious conflict", "C": "Political conflict", "D": "Agricultural conflict"}, "answer": "D"}, {"number": 32, "q": "Conflict between workers and management may be classified as ______ conflict.", "options": {"A": "ethnic", "B": "industrial", "C": "religious", "D": "educational"}, "answer": "B"}, {"number": 33, "q": "Conflict over natural or other resources is called ______ conflict.", "options": {"A": "resource", "B": "political", "C": "spiritual", "D": "personality"}, "answer": "A"}, {"number": 34, "q": "Conflict occurring within schools or other learning environments is conflict in ______.", "options": {"A": "religious institutions", "B": "educational institutions", "C": "political institutions", "D": "industrial institutions"}, "answer": "B"}, {"number": 35, "q": "Conflict arising from differences in personality is called ______ conflict.", "options": {"A": "personality", "B": "resource", "C": "ethnic", "D": "industrial"}, "answer": "A"}, {"number": 36, "q": "The first stage of conflict is the ______ stage.", "options": {"A": "crisis", "B": "outcome", "C": "pre-conflict", "D": "post-conflict"}, "answer": "C"}, {"number": 37, "q": "At the pre-conflict stage, the goals of parties are ______.", "options": {"A": "compatible Peace and Conflict Resolution  Page 5", "B": "incompatible", "C": "identical", "D": "equal"}, "answer": "B"}, {"number": 38, "q": "The pre-conflict stage may be described as a period of ______.", "options": {"A": "hot war", "B": "cold war", "C": "reconciliation", "D": "arbitration"}, "answer": "B"}, {"number": 39, "q": "At the confrontation stage, conflict becomes ______.", "options": {"A": "hidden", "B": "open or manifest", "C": "impossible", "D": "resolved"}, "answer": "B"}, {"number": 40, "q": "The confrontation stage is characterized by occasional fighting and low levels of ______.", "options": {"A": "cooperation", "B": "violence", "C": "tolerance", "D": "reconciliation"}, "answer": "B"}, {"number": 41, "q": "The ______ stage represents the peak of conflict.", "options": {"A": "pre-conflict", "B": "crisis", "C": "outcome", "D": "post-conflict"}, "answer": "B"}, {"number": 42, "q": "In violent contexts, the crisis stage may involve intense ______.", "options": {"A": "negotiation", "B": "fighting", "C": "reconciliation", "D": "cooperation"}, "answer": "B"}, {"number": 43, "q": "Killings, injuries, and displacement may occur during the ______ stage.", "options": {"A": "crisis", "B": "outcome", "C": "pre-conflict", "D": "post-conflict"}, "answer": "A"}, {"number": 44, "q": "During the outcome stage, one party may ______.", "options": {"A": "surrender", "B": "escalate immediately", "C": "ignore the conflict", "D": "create a new conflict"}, "answer": "A"}, {"number": 45, "q": "A third party may intervene during the ______ stage to impose a solution.", "options": {"A": "pre-conflict", "B": "outcome", "C": "confrontation", "D": "crisis"}, "answer": "B"}, {"number": 46, "q": "Violence decreases during the ______ stage.", "options": {"A": "outcome", "B": "confrontation", "C": "crisis Peace and Conflict Resolution  Page 6", "D": "pre-conflict"}, "answer": "A"}, {"number": 47, "q": "The stage in which underlying causes of conflict should be addressed is the ______ stage.", "options": {"A": "confrontation", "B": "post-conflict", "C": "crisis", "D": "pre-conflict"}, "answer": "B"}, {"number": 48, "q": "If underlying causes are not addressed, the conflict ______.", "options": {"A": "disappears permanently", "B": "may restart", "C": "becomes irrelevant", "D": "becomes peaceful automatically"}, "answer": "B"}, {"number": 49, "q": "Which stage follows the crisis stage?", "options": {"A": "Pre-conflict", "B": "Outcome", "C": "Confrontation", "D": "Crisis"}, "answer": "B"}, {"number": 50, "q": "The final stage in the conflict cycle presented in the note is the ______ stage.", "options": {"A": "post-conflict", "B": "confrontation", "C": "crisis", "D": "pre-conflict"}, "answer": "A"}, {"number": 51, "q": "Conflict resolution aims at bringing about a ______ settlement.", "options": {"A": "temporary", "B": "durable", "C": "violent", "D": "political"}, "answer": "B"}, {"number": 52, "q": "Conflict resolution is essential for fostering ______ behavior.", "options": {"A": "aggressive", "B": "cooperative", "C": "violent", "D": "competitive"}, "answer": "B"}, {"number": 53, "q": "Which of the following is a conflict-resolution strategy?", "options": {"A": "Rule of Law", "B": "Ethnic hatred", "C": "Religious bigotry", "D": "Violence"}, "answer": "A"}, {"number": 54, "q": "Political agreement involves negotiation and ______ between parties.", "options": {"A": "confrontation", "B": "consensus", "C": "aggression", "D": "litigation"}, "answer": "B"}, {"number": 55, "q": "Religious authority emphasizes morality and ______ guidance.", "options": {"A": "military", "B": "divine", "C": "political", "D": "economic Peace and Conflict Resolution  Page 7"}, "answer": "B"}, {"number": 56, "q": "Military force uses ______ to impose peace.", "options": {"A": "cooperation", "B": "coercion", "C": "tolerance", "D": "reconciliation"}, "answer": "B"}, {"number": 57, "q": "Theories of conflict are frameworks for explaining human ______.", "options": {"A": "behavior", "B": "resources", "C": "institutions", "D": "weapons"}, "answer": "A"}, {"number": 58, "q": "Attributive theory focuses on the causes of actions by attributing them to people's characteristics, attitudes, and ______.", "options": {"A": "intentions", "B": "resources", "C": "education", "D": "occupations"}, "answer": "A"}, {"number": 59, "q": "Attributive theory may cause people to place blame and responsibility on ______.", "options": {"A": "themselves only", "B": "others", "C": "government only", "D": "institutions only"}, "answer": "B"}, {"number": 60, "q": "Confrontation episode theory emphasizes the importance of examining the ______ of rules guiding relationships.", "options": {"A": "cost", "B": "legitimacy", "C": "duration", "D": "number"}, "answer": "B"}, {"number": 61, "q": "Confrontation episode theory considers whether parties are friends or merely ______.", "options": {"A": "enemies", "B": "acquainted", "C": "relatives", "D": "colleagues"}, "answer": "B"}, {"number": 62, "q": "The Coordinated Management of Meaning theory is abbreviated as ______.", "options": {"A": "CMM", "B": "VAT", "C": "ADR", "D": "CSO"}, "answer": "A"}, {"number": 63, "q": "According to CMM, the meaning of conversation depends on the ______.", "options": {"A": "weather", "B": "context or nature of the relationship", "C": "size of the group", "D": "location only"}, "answer": "B"}, {"number": 64, "q": "Cultural background can influence the understanding of ______.", "options": {"A": "conversation", "B": "weapons", "C": "litigation", "D": "resources Peace and Conflict Resolution  Page 8"}, "answer": "A"}, {"number": 65, "q": "The theory that emphasizes dialogue and collaboration in solving problems is the ______ theory.", "options": {"A": "Integrative", "B": "Attributive", "C": "Social Influence", "D": "Verbal Aggressiveness"}, "answer": "A"}, {"number": 66, "q": "Peacebuilding involves the use of peaceful and ______ methods.", "options": {"A": "violent", "B": "non-violent", "C": "military", "D": "coercive"}, "answer": "B"}, {"number": 67, "q": "Peacebuilding seeks to prevent the ______ of conflict.", "options": {"A": "settlement", "B": "outbreak", "C": "resolution", "D": "transformation"}, "answer": "B"}, {"number": 68, "q": "Conflict management is the process of looking for ways to ______ a conflict situation.", "options": {"A": "increase", "B": "control", "C": "create", "D": "ignore"}, "answer": "B"}, {"number": 69, "q": "Conflict management deals with parties that have ______ goals.", "options": {"A": "identical", "B": "incompatible", "C": "peaceful", "D": "common"}, "answer": "B"}, {"number": 70, "q": "Conflict management can also be regarded as conflict ______.", "options": {"A": "escalation", "B": "regulation", "C": "creation", "D": "confrontation"}, "answer": "B"}, {"number": 71, "q": "Being proactive means preventing the occurrence of conflict in the ______ place.", "options": {"A": "second", "B": "first", "C": "third", "D": "final"}, "answer": "B"}, {"number": 72, "q": "Which of the following belongs to the reactive category of peaceful conflict management?", "options": {"A": "Mediation", "B": "Collaboration", "C": "Good governance", "D": "Community festivals"}, "answer": "A"}, {"number": 73, "q": "Mediation involves assistance by a ______ party.", "options": {"A": "first", "B": "third", "C": "conflicting", "D": "military"}, "answer": "B"}, {"number": 74, "q": "Mediation is described as a ______ process.", "options": {"A": "compulsory Peace and Conflict Resolution  Page 9", "B": "voluntary", "C": "violent", "D": "judicial"}, "answer": "B"}, {"number": 75, "q": "A mediator manages the negotiation process but does not ______ a solution.", "options": {"A": "discuss", "B": "impose", "C": "suggest", "D": "explain"}, "answer": "B"}, {"number": 76, "q": "The objective of mediation is to help parties reach a ______ to their problem.", "options": {"A": "conflict", "B": "solution", "C": "disagreement", "D": "crisis"}, "answer": "B"}, {"number": 77, "q": "Negotiation is a direct process of dialogue and ______.", "options": {"A": "fighting", "B": "discussion", "C": "litigation", "D": "punishment"}, "answer": "B"}, {"number": 78, "q": "Negotiation requires ______ between parties.", "options": {"A": "communication", "B": "violence", "C": "force", "D": "litigation"}, "answer": "A"}, {"number": 79, "q": "The goal of negotiation is to reach ______ through joint decision-making.", "options": {"A": "conflict", "B": "agreement", "C": "war", "D": "confrontation"}, "answer": "B"}, {"number": 80, "q": "Conciliation involves a ______ party assisting conflicting parties.", "options": {"A": "neutral third", "B": "military", "C": "political", "D": "religious"}, "answer": "A"}, {"number": 81, "q": "Conciliation helps to reduce ______ between conflicting parties.", "options": {"A": "cooperation", "B": "tension", "C": "trust", "D": "peace"}, "answer": "B"}, {"number": 82, "q": "Arbitration involves a neutral third party who listens to ______ from both parties.", "options": {"A": "rumours", "B": "evidence", "C": "complaints only", "D": "opinions only"}, "answer": "B"}, {"number": 83, "q": "The decision rendered by an arbitrator is called an ______.", "options": {"A": "agreement", "B": "award", "C": "accusation Peace and Conflict Resolution  Page 10", "D": "appeal"}, "answer": "B"}, {"number": 84, "q": "An arbitration award is ______ on the conflicting parties.", "options": {"A": "optional", "B": "binding", "C": "temporary", "D": "informal"}, "answer": "B"}, {"number": 85, "q": "Adjudication involves the use of court and ______ processes.", "options": {"A": "mediation", "B": "litigation", "C": "collaboration", "D": "reconciliation"}, "answer": "B"}, {"number": 86, "q": "In adjudication, the court gives a ______.", "options": {"A": "negotiation", "B": "judgment", "C": "mediation", "D": "proposal"}, "answer": "B"}, {"number": 87, "q": "Litigation may destroy trust, love, respect, and other forms of ______.", "options": {"A": "conflict", "B": "confidence", "C": "violence", "D": "competition"}, "answer": "B"}, {"number": 88, "q": "ADR stands for ______.", "options": {"A": "Alternative Dispute Resolution", "B": "African Dispute Regulation", "C": "Alternative Development Research", "D": "African Development Resolution"}, "answer": "A"}, {"number": 89, "q": "ADR emphasizes ______ methods of settling disputes.", "options": {"A": "violent", "B": "non-conventional peaceful", "C": "military", "D": "coercive"}, "answer": "B"}, {"number": 90, "q": "Reconciliation involves the restoration of broken ______.", "options": {"A": "laws", "B": "relationships", "C": "governments", "D": "institutions"}, "answer": "B"}, {"number": 91, "q": "Which of the following is an ingredient of reconciliation?", "options": {"A": "Mercy", "B": "Violence", "C": "Bigotry", "D": "Aggression"}, "answer": "A"}, {"number": 92, "q": "The three elements of peace listed in the note include tolerance, love, and ______.", "options": {"A": "justice", "B": "kindness", "C": "mercy", "D": "truth Peace and Conflict Resolution  Page 11"}, "answer": "B"}, {"number": 93, "q": "Peace education is the systematic enlightenment and capacity building of ______.", "options": {"A": "individuals and groups", "B": "soldiers only", "C": "politicians only", "D": "judges only"}, "answer": "A"}, {"number": 94, "q": "Peace education seeks to promote a culture of ______.", "options": {"A": "violence", "B": "peace", "C": "competition", "D": "confrontation"}, "answer": "B"}, {"number": 95, "q": "Peace education is characterized by tolerance, love, forgiveness, understanding, and ______ resolution.", "options": {"A": "violent", "B": "peaceful", "C": "military", "D": "political"}, "answer": "A"}, {"number": 96, "q": "International organizations are transnational organizations created by two or more ______ states.", "options": {"A": "local", "B": "sovereign", "C": "private", "D": "traditional"}, "answer": "B"}, {"number": 97, "q": "The headquarters of the United Nations is in ______.", "options": {"A": "London", "B": "New York", "C": "Paris", "D": "Abuja"}, "answer": "B"}, {"number": 98, "q": "Which of the following is an example of an international organization mentioned in the note?", "options": {"A": "UNESCO", "B": "NLC", "C": "CLO", "D": "CBO"}, "answer": "A"}, {"number": 99, "q": "Disarmament involves the reduction in the number of ______ in armed forces.", "options": {"A": "soldiers", "B": "weapons", "C": "schools", "D": "governments"}, "answer": "B"}, {"number": 100, "q": "Which of the following is an activity of Civil Society Organizations in Nigeria?", "options": {"A": "Promoting human rights awareness", "B": "Promoting ethnic conflict", "C": "Encouraging violence", "D": "Preventing peace workshops Peace and Conflict Resolution  Page 12 ANSWER KEY Correct options for Questions 1–100 1. B 2. B 3. C 4. B 5. C 6. B 7. B 8. B 9. B 10. A 11. B 12. B 13. B 14. B 15. A 16. B 17. B 18. B 19. B 20. B 21. A 22. B 23. B 24. A 25. B 26. B 27. B 28. A 29. A 30. B 31. D 32. B 33. A 34. B 35. A 36. C 37. B 38. B 39. B 40. B 41. B 42. B 43. A 44. A 45. B 46. A 47. B 48. B 49. B 50. A 51. B 52. B 53. A 54. B 55. B 56. B 57. A 58. A 59. B 60. B 61. B 62. A 63. B 64. A 65. A 66. B 67. B 68. B 69. B 70. B 71. B 72. A 73. B 74. B 75. B 76. B 77. B 78. A 79. B 80. A 81. B 82. B 83. B 84. B 85. B 86. B 87. B 88. A 89. B 90. B 91. A 92. B 93. A 94. B 95. A 96. B 97. B 98. A 99. B 100. A Prepared from the supplied Peace and Conflict Resolution note."}, "answer": "A"}];
+const PASSWORD = "SIR TERSUE";
+let remaining = 50 * 60;
+let timerHandle = null;
+let submitted = false;
+
+function startTest() {
+  const p = document.getElementById("password").value;
+  if (p !== PASSWORD) {
+    document.getElementById("loginError").textContent = "Incorrect password. Enter exactly: SIR TERSUE";
+    return;
+  }
+  document.getElementById("login").classList.add("hidden");
+  document.getElementById("test").classList.remove("hidden");
+  renderQuiz();
+  updateTimer();
+  timerHandle = setInterval(() => {
+    remaining--;
+    updateTimer();
+    if (remaining <= 0) {
+      clearInterval(timerHandle);
+      submitTest(true);
+    }
+  }, 1000);
+}
+
+function renderQuiz() {
+  const form = document.getElementById("quizForm");
+  form.innerHTML = QUESTIONS.map(item => `
+    <div class="question" id="question-${item.number}">
+      <h3>${item.number}. ${escapeHtml(item.q)}</h3>
+      ${["A","B","C","D"].map(letter => `
+        <label class="option">
+          <input type="radio" name="q${item.number}" value="${letter}" onchange="updateProgress()">
+          <strong>${letter}.</strong> ${escapeHtml(item.options[letter])}
+        </label>`).join("")}
+    </div>`).join("");
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+function updateTimer() {
+  const mins = Math.floor(Math.max(remaining,0)/60);
+  const secs = Math.max(remaining,0)%60;
+  document.getElementById("timer").textContent =
+    String(mins).padStart(2,"0") + ":" + String(secs).padStart(2,"0");
+}
+
+function updateProgress() {
+  const answered = QUESTIONS.filter(q => document.querySelector(`input[name="q${q.number}"]:checked`)).length;
+  document.getElementById("progressText").textContent = `${answered} of 100 answered`;
+  document.getElementById("progressBar").style.width = `${answered}%`;
+}
+
+function submitTest(autoSubmit) {
+  if (submitted) return;
+  submitted = true;
+  clearInterval(timerHandle);
+
+  let score = 0;
+  QUESTIONS.forEach(item => {
+    const selected = document.querySelector(`input[name="q${item.number}"]:checked`);
+    if (selected && selected.value === item.answer) score++;
+  });
+
+  document.getElementById("test").classList.add("hidden");
+  document.getElementById("results").classList.remove("hidden");
+  document.getElementById("score").textContent = `Score: ${score} / 100`;
+  document.getElementById("summary").textContent =
+    autoSubmit ? "Time expired. Your test was submitted automatically." :
+    `You answered ${QUESTIONS.filter(q => document.querySelector(`input[name="q${q.number}"]:checked`)).length} of 100 questions.`;
+}
+
+function showAnswers() {
+  const box = document.getElementById("answerReview");
+  box.classList.remove("hidden");
+  box.innerHTML = "<h2>Correct Answers</h2>" + QUESTIONS.map(item => {
+    const selected = document.querySelector(`input[name="q${item.number}"]:checked`);
+    const chosen = selected ? selected.value : "Not answered";
+    const cls = chosen === item.answer ? "correct" : "incorrect";
+    return `<div class="question ${cls}">
+      <strong>${item.number}.</strong> Correct answer: <strong>${item.answer}</strong>
+      <span class="small"> — Your answer: ${chosen}</span>
+    </div>`;
+  }).join("");
+}
+</script>
+</body>
+</html>
