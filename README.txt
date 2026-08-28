@@ -30,7 +30,7 @@ FEATURES:
 - Mobile-friendly page
 
 IMPORTANT:
-This is a client-side HTML CBT. The password and answer key are contained in the
+This is a client-side HTML CBT. The password and contained in the
 page source, so this should NOT be treated as a secure examination system for
 high-stakes/proctored testing. It is suitable for a simple shareable CBT.
 
